@@ -24,7 +24,6 @@ import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform._
 import com.typesafe.tools.mima.plugin.MimaKeys._
 import com.typesafe.tools.mima.plugin.MimaPlugin._
-import net.virtualvoid.sbt.graph.Plugin.graphSettings
 import sbt.Keys._
 import sbt.Tests._
 import sbt._
@@ -99,22 +98,23 @@ object Settings extends Build {
   )
 
   lazy val sparkPackageSettings = Seq(
-    spName := "datastax/spark-cassandra-connector",
+    spName := "datastax/spark-cassandra-connectorAll",
     sparkVersion := Versions.Spark,
     spAppendScalaVersion := true,
     spIncludeMaven := true,
     spIgnoreProvided := true,
+    spShade := true,
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
   )
 
   override lazy val settings = super.settings ++ buildSettings ++ Seq(
-    normalizedName := "spark-cassandra-connector",
-    name := "DataStax Apache Cassandra connector for Apache Spark",
+    normalizedName := "spark-cassandra-connectorAll",
+    name := "DataStax Apache Cassandra connectorAll for Apache Spark",
     organization := "com.datastax.spark",
     description  := """
                   |A library that exposes Cassandra tables as Spark RDDs, writes Spark RDDs to
                   |Cassandra tables, and executes CQL queries in Spark applications.""".stringPrefix,
-    homepage := Some(url("https://github.com/datastax/spark-cassandra-connector")),
+    homepage := Some(url("https://github.com/datastax/spark-cassandra-connectorAll")),
     licenses := Seq(("Apache License 2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))),
     promptTheme := ScalapenosTheme
   )
@@ -135,7 +135,7 @@ object Settings extends Build {
 
   val installSparkTask = taskKey[Unit]("Optionally install Spark from Git to local Maven repository")
 
-  lazy val projectSettings = graphSettings ++ Seq(
+  lazy val projectSettings = Seq(
 
     concurrentRestrictions in Global += Tags.limit(Tags.Test, parallelTasks),
 
@@ -206,7 +206,8 @@ object Settings extends Build {
   lazy val defaultSettings = projectSettings ++ mimaSettings ++ releaseSettings ++ testSettings
 
   lazy val rootSettings = Seq(
-    cleanKeepFiles ++= Seq("resolution-cache", "streams", "spark-archives").map(target.value / _)
+    cleanKeepFiles ++= Seq("resolution-cache", "streams", "spark-archives").map(target.value / _),
+    updateOptions := updateOptions.value.withCachedResolution(true)
   )
 
   lazy val demoSettings = projectSettings ++ noPublish ++ Seq(
@@ -231,7 +232,7 @@ object Settings extends Build {
       cp
     }
   )
-  lazy val assembledSettings = defaultSettings ++ customTasks ++ sparkPackageSettings ++ sbtAssemblySettings
+  lazy val assembledSettings = defaultSettings ++ customTasks ++ sbtAssemblySettings ++ sparkPackageSettings
 
   val testOptionSettings = Seq(
     Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
@@ -294,7 +295,7 @@ object Settings extends Build {
     }.toSeq
   }
 
-  lazy val testSettings = testConfigs ++ testArtifacts ++ graphSettings ++ Seq(
+  lazy val testSettings = testConfigs ++ testArtifacts ++ Seq(
     parallelExecution in Test := true,
     parallelExecution in IntegrationTest := true,
     javaOptions in IntegrationTest ++= TEST_JAVA_OPTS,
@@ -346,10 +347,9 @@ object Settings extends Build {
       }
     },
     assemblyShadeRules in assembly := {
-      val shadePackage = "shade.com.datastax.spark.connector"
+      val shadePackage = "shade.com.datastax.spark.connectorAll"
       Seq(
-        ShadeRule.rename("com.google.common.**" -> s"$shadePackage.google.common.@1").inAll,
-        ShadeRule.rename("io.netty.**" -> s"$shadePackage.netty.@1").inAll
+        ShadeRule.rename("com.google.common.**" -> s"$shadePackage.google.common.@1").inAll
       )
     }
   )
