@@ -98,7 +98,7 @@ object Settings extends Build {
   )
 
   lazy val sparkPackageSettings = Seq(
-    spName := "datastax/spark-cassandra-connectorAll",
+    spName := "datastax/spark-cassandra-connector",
     sparkVersion := Versions.Spark,
     spAppendScalaVersion := true,
     spIncludeMaven := true,
@@ -108,13 +108,13 @@ object Settings extends Build {
   )
 
   override lazy val settings = super.settings ++ buildSettings ++ Seq(
-    normalizedName := "spark-cassandra-connectorAll",
-    name := "DataStax Apache Cassandra connectorAll for Apache Spark",
+    normalizedName := "spark-cassandra-connector",
+    name := "DataStax Apache Cassandra connector for Apache Spark",
     organization := "com.datastax.spark",
     description  := """
                   |A library that exposes Cassandra tables as Spark RDDs, writes Spark RDDs to
                   |Cassandra tables, and executes CQL queries in Spark applications.""".stringPrefix,
-    homepage := Some(url("https://github.com/datastax/spark-cassandra-connectorAll")),
+    homepage := Some(url("https://github.com/datastax/spark-cassandra-connector")),
     licenses := Seq(("Apache License 2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))),
     promptTheme := ScalapenosTheme
   )
@@ -347,7 +347,7 @@ object Settings extends Build {
       }
     },
     assemblyShadeRules in assembly := {
-      val shadePackage = "shade.com.datastax.spark.connectorAll"
+      val shadePackage = "shade.com.datastax.spark.connector"
       Seq(
         ShadeRule.rename("com.google.common.**" -> s"$shadePackage.google.common.@1").inAll
       )
